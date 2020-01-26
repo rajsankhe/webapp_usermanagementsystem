@@ -48,7 +48,7 @@ hs_err_pid*
 .idea/**/usage.statistics.xml
 .idea/**/dictionaries
 .idea/**/shelf
-
+.idea
 # Generated files
 .idea/**/contentModel.xml
 
@@ -126,7 +126,8 @@ fabric.properties
 .idea/**/markdown-navigator.xml
 .idea/**/markdown-navigator/
 
-#Maven Ignore
+# End of https://www.gitignore.io/api/intellij
+
 target/
 pom.xml.tag
 pom.xml.releaseBackup
@@ -137,5 +138,14 @@ dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
 # https://github.com/takari/maven-wrapper#usage-without-binary-jar
-.mvn/wrapper/maven-wrapper.ja
-# End of https://www.gitignore.io/api/intellij
+*.mvn/wrapper/maven-wrapper.jar
+*.mvn/wrapper/MavenWrapperDownloader.java
+*.mvn/wrapper/maven-wrapper.properties
+
+.classpath
+.project
+HELP.md
+mvnw
+mvnw.cmd
+
+
