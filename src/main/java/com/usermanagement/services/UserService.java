@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.usermanagement.exceptions.ResourceNotFoundException;
 import com.usermanagement.exceptions.ValidationException;
+import com.usermanagement.models.Bill;
 import com.usermanagement.models.User;
 import com.usermanagement.repositories.UserRepository;
 
@@ -78,7 +79,7 @@ public class UserService {
 		}
 	}
 	
-	private boolean checkPassword(String password) {
+	public boolean checkPassword(String password) {
 		//The following regex ensures at least one lowercase, uppercase, number, and symbol exist in a 8+ character length password:
 		Rule ruleRegex = new AllowedRegexRule("((?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{8,64})"); 
 		PasswordValidator passwordValidator = new PasswordValidator(ruleRegex);
@@ -99,5 +100,6 @@ public class UserService {
 		}
 		return false;
 	}
+
 
 }
