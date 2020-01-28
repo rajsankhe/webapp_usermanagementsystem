@@ -26,11 +26,6 @@ public class UserManagementController {
 	@Autowired
 	private UserService userService;
 
-	@RequestMapping("/hello")
-	public String helloWorld(@RequestParam(value = "name", defaultValue = "World") String name) {
-		return "Helloooo " + name + "!!";
-	}
-
 	@PostMapping()
 	public ResponseEntity<User> newUser(@Valid @RequestBody User newUser) throws ValidationException {
 		return new ResponseEntity<User>(userService.save(newUser),HttpStatus.CREATED);

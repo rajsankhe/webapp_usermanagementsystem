@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import com.usermanagement.models.User;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, Long>{
+public interface UserRepository extends JpaRepository<User, UUID>{
 	
 	User findByEmailAddress(String emailAddress);	
 
