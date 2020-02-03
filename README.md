@@ -16,7 +16,7 @@
 Below swagger URL lists all the APIs which can be hit
 [https://app.swaggerhub.com/apis-docs/csye6225/spring2020/assignment-02](https://app.swaggerhub.com/apis-docs/csye6225/spring2020/assignment-02)
 
-# Instructions to run Unit Test
+# Instructions to run Unit Tests
 - To perform the Unit Testing of the modules and controller, run the JUnit tests.
 - Need to validate the input via a payload along with username and password using the POSTMAN app.
 - Need to validate the GET and POST requests with relevant JSON payload
