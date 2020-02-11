@@ -4,10 +4,13 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
@@ -19,6 +22,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 enum PaymentStatus 
 { 
@@ -34,6 +38,8 @@ enum PaymentStatus
 
 @Entity
 @Table(name="Bill")
+@JsonPropertyOrder({"id","created_ts","updated_ts","owner_id","vendor","bill_date", "due_date","amount_due","categories","paymentStatus",
+	"attachment"})
 public class Bill {
 	@Id
     @GeneratedValue(generator = "UUID")
@@ -42,7 +48,7 @@ public class Bill {
             strategy = "org.hibernate.id.UUIDGenerator"
     )
     @Column(name = "billId", updatable = false, nullable = false)
-	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
+	@JsonProperty(value="id",access = JsonProperty.Access.READ_ONLY)
     private UUID billId;
 	
 	@JsonProperty(value = "created_ts",access = JsonProperty.Access.READ_ONLY)
@@ -85,7 +91,12 @@ public class Bill {
 	@NotNull(message = "paymentStatus is mandatory")
 	private PaymentStatus paymentStatus;
 
-
+	@OneToOne(fetch = FetchType.LAZY,
+            cascade =  CascadeType.ALL,
+            mappedBy = "bill")
+	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
+	private File attachment;
+	
 	public UUID getBillId() {
 		return billId;
 	}
@@ -165,5 +176,14 @@ public class Bill {
 	public void setAmountDue(Double amountDue) {
 		this.amountDue = amountDue;
 	}
+
+	public File getAttachment() {
+		return attachment;
+	}
+
+	public void setAttachment(File attachment) {
+		this.attachment = attachment;
+	}
+	
 	
 }
