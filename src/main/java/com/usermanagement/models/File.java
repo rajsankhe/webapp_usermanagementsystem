@@ -61,7 +61,6 @@ public class File {
 	
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "billId", nullable = false)
-	@OnDelete(action = OnDeleteAction.CASCADE)
 	@JsonIgnore
 	private Bill bill;
 	

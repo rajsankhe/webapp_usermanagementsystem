@@ -47,7 +47,10 @@ public class BillService {
 	@Autowired
 	private CommonUtil commonUtil;
 	
-	public Bill save(Bill bill){
+	public Bill save(Bill bill) throws ValidationException{
+		if(Double.compare(bill.getAmountDue(), 0.01)<0){
+			throw new ValidationException("amount_due should be atleast 0.01");
+		}
 		return billRepository.save(bill);
 	}
 
@@ -80,11 +83,14 @@ public class BillService {
 		}
 	}
 
-	public Bill updateBill(String name, String id, Bill bill) throws ResourceNotFoundException {
+	public Bill updateBill(String name, String id, Bill bill) throws ResourceNotFoundException, ValidationException {
 		User loggedUser= userRepository.findByEmailAddress(name.toLowerCase());
 		if(loggedUser!=null)
 		{
 			Bill billOp= billRepository.findByOwnerIdAndBillId(loggedUser.getId(), UUID.fromString(id));
+			if(Double.compare(bill.getAmountDue(), 0.01)<0){
+				throw new ValidationException("Bill amount due should be atleast 0.01");
+			}
 			if(billOp!=null)
 			{
 				billOp.setVendor(bill.getVendor());
@@ -127,28 +133,30 @@ public class BillService {
 			Bill bill= billRepository.findByOwnerIdAndBillId(loggedUser.getId(), billId);
 			if(bill!=null)
 			{
-				String originalFileName= fileinput.getOriginalFilename();
-				String ext= originalFileName.split(".",-1)[1];
-				List<String> exts= new ArrayList<String>();
-				exts.add("pdf");
-				exts.add("png");
-				exts.add("jpg");
-				exts.add("jpeg");
-				if(!exts.contains(ext.toLowerCase()))
+				if(bill.getAttachment()==null)
 				{
-					throw new ValidationException("Application supports bill formats such as pdf, png, jpg, and jpeg");
+					String originalFileName= fileinput.getOriginalFilename();
+					if(!commonUtil.validateAttachmentExtension(originalFileName))
+					{
+						throw new ValidationException("Application supports bill formats such as pdf, png, jpg, and jpeg");
+					}
+					else
+					{
+						String fileLocation = fileStorageUtil.storeFile(fileinput);
+						File file = new File();
+						file.setUrl(fileLocation);
+						file.setFileNameStored(commonUtil.getFileNameFromPath(fileLocation));
+						file.setContentType(fileinput.getContentType());
+						file.setBill(bill);
+						file.setUploadDate(commonUtil.getCurrentDateWithFormat("yyyy-MM-dd"));
+						file.setOriginalFileName(fileinput.getOriginalFilename());
+						file.setSize(fileinput.getSize());
+						file.setOwner(loggedUser.getEmailAddress());
+						return fileReposiory.save(file);
+					}
 				}
-				String fileLocation = fileStorageUtil.storeFile(fileinput);
-				File file = new File();
-				file.setUrl(fileLocation);
-				file.setFileNameStored(commonUtil.getFileNameFromPath(fileLocation));
-				file.setContentType(fileinput.getContentType());
-				file.setBill(bill);
-				file.setUploadDate(commonUtil.getCurrentDateWithFormat("yyyy-MM-dd"));
-				file.setOriginalFileName(fileinput.getOriginalFilename());
-				file.setSize(fileinput.getSize());
-				file.setOwner(loggedUser.getEmailAddress());
-				return fileReposiory.save(file);
+				else
+					throw new ValidationException("Updating existing image requires deleting it first and then uploading a new image.");
 			}
 			else
 				throw new ResourceNotFoundException("Bill does not exist for given id and logged user");
@@ -168,7 +176,7 @@ public class BillService {
 			if(bill!=null)
 			{
 				File file= bill.getAttachment();
-				if(file.getId().compareTo(fileId)==0)
+				if(file!=null && file.getId().compareTo(fileId)==0)
 				{
 					return file;
 				}
@@ -184,7 +192,7 @@ public class BillService {
 		}
 	}
 
-	public void deleteFile(String name, UUID billId, UUID fileId) throws ResourceNotFoundException {
+	public void deleteFile(String name, UUID billId, UUID fileId) throws ResourceNotFoundException, FileStorageException {
 		User loggedUser= userRepository.findByEmailAddress(name.toLowerCase());
 		if(loggedUser!=null)
 		{
@@ -192,8 +200,11 @@ public class BillService {
 			if(bill!=null)
 			{
 				File file= bill.getAttachment();
-				if(file.getId().compareTo(fileId)==0)
+				if(file!=null &&file.getId().compareTo(fileId)==0)
 				{
+					bill.setAttachment(null);
+					billRepository.save(bill);
+					fileStorageUtil.deleteFile(file.getUrl());
 					fileReposiory.delete(file);
 				}
 				else

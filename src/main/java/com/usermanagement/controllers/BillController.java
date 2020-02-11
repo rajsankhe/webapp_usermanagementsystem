@@ -109,11 +109,11 @@ public class BillController {
 		return new ResponseEntity<File>(HttpStatus.UNAUTHORIZED);
 	}
 	
-	@DeleteMapping("/bill/{id}")
-	protected ResponseEntity deleteFile(Authentication  authentication,@PathVariable(value="id") String id ) throws ValidationException, ResourceNotFoundException {
+	@DeleteMapping("/bill/{billId}/file/{fileId}")
+	protected ResponseEntity deleteFile(Authentication  authentication,@PathVariable(value="billId") UUID billId, @PathVariable(value="fileId") UUID fileId ) throws ValidationException, ResourceNotFoundException, FileStorageException {
 		if(authentication!=null)
 		{
-			billService.deleteBill(authentication.getName(),id);
+			billService.deleteFile(authentication.getName(),billId,fileId);
 			return new ResponseEntity(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity(HttpStatus.UNAUTHORIZED);
