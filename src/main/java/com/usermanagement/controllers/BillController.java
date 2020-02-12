@@ -1,5 +1,7 @@
 package com.usermanagement.controllers;
 
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.UUID;
 
@@ -81,7 +83,7 @@ public class BillController {
 	}
 	
 	@DeleteMapping("/bill/{id}")
-	protected ResponseEntity deleteBill(Authentication  authentication,@PathVariable(value="id") String id ) throws ValidationException, ResourceNotFoundException {
+	protected ResponseEntity deleteBill(Authentication  authentication,@PathVariable(value="id") UUID id ) throws ValidationException, ResourceNotFoundException, FileStorageException {
 		if(authentication!=null)
 		{
 			billService.deleteBill(authentication.getName(),id);
@@ -92,7 +94,7 @@ public class BillController {
 	
 	@RequestMapping(value ="/bill/{id}/file", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<File> attachFile(Authentication  authentication,@PathVariable(value="id") UUID billId, @RequestParam("billAttachment") MultipartFile file)
-			throws ValidationException, ResourceNotFoundException, FileStorageException {
+			throws ValidationException, ResourceNotFoundException, FileStorageException, NoSuchAlgorithmException, IOException {
 		if(authentication!=null)
 		{
 			return new ResponseEntity(billService.saveAttachment(authentication.getName(), billId, file),HttpStatus.CREATED);

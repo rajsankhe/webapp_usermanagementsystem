@@ -77,6 +77,9 @@ public class File {
 	@JsonIgnore
 	private String contentType;
 	
+	@JsonIgnore
+	private String hash;
+	
 	public UUID getId() {
 		return id;
 	}
@@ -149,6 +152,14 @@ public class File {
 
 	public void setContentType(String contentType) {
 		this.contentType = contentType;
+	}
+
+	public String getHash() {
+		return hash;
+	}
+
+	public void setHash(String hash) {
+		this.hash = hash;
 	}
 
 	

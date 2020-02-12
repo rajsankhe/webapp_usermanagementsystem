@@ -1,5 +1,7 @@
 package com.usermanagement.services;
 
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -110,13 +112,16 @@ public class BillService {
 		}
 	}
 
-	public void deleteBill(String name, String id) throws ResourceNotFoundException {
+	public void deleteBill(String name, UUID id) throws ResourceNotFoundException, FileStorageException {
 		User loggedUser= userRepository.findByEmailAddress(name.toLowerCase());
 		if(loggedUser!=null)
 		{
-			Bill bill= billRepository.findByOwnerIdAndBillId(loggedUser.getId(), UUID.fromString(id));
+			Bill bill= billRepository.findByOwnerIdAndBillId(loggedUser.getId(), id);
 			if(bill!=null)
+			{
+				deleteFile(name,id,bill.getAttachment().getId());
 				billRepository.delete(bill);
+			}
 			else
 				throw new ResourceNotFoundException("Bill does not exist for given id and logged user");
 		}
@@ -126,7 +131,7 @@ public class BillService {
 		}
 	}
 
-	public File saveAttachment(String name, UUID billId, MultipartFile fileinput) throws ResourceNotFoundException, FileStorageException, ValidationException {
+	public File saveAttachment(String name, UUID billId, MultipartFile fileinput) throws ResourceNotFoundException, FileStorageException, ValidationException, NoSuchAlgorithmException, IOException {
 		User loggedUser= userRepository.findByEmailAddress(name.toLowerCase());
 		if(loggedUser!=null)
 		{
@@ -152,6 +157,7 @@ public class BillService {
 						file.setOriginalFileName(fileinput.getOriginalFilename());
 						file.setSize(fileinput.getSize());
 						file.setOwner(loggedUser.getEmailAddress());
+						file.setHash(commonUtil.computeMD5Hash(fileinput.getBytes()));
 						return fileReposiory.save(file);
 					}
 				}
