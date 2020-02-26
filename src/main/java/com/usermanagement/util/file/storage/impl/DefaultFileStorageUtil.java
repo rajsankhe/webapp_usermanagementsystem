@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,6 +17,7 @@ import com.usermanagement.util.file.storage.FileStorageUtil;
 
 @Component
 @Scope(value = "singleton")
+@Profile("default")
 public class DefaultFileStorageUtil implements FileStorageUtil {
 
 	private final Path fileStorageLocation;
