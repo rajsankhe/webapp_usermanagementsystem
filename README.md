@@ -14,11 +14,11 @@
 
 # profiles
 - dev
--default
+- default
 
 # APIs Implemented
 Below swagger URL lists all the APIs which can be hit
-[https://app.swaggerhub.com/apis-docs/csye6225/spring2020/assignment-02](https://app.swaggerhub.com/apis-docs/csye6225/spring2020/assignment-02)
+[https://app.swaggerhub.com/apis-docs/csye6225/spring2020/assignment-04](https://app.swaggerhub.com/apis-docs/csye6225/spring2020/assignment-02)
 
 # Instructions to run Unit Tests
 - To perform the Unit Testing of the modules and controller, run the JUnit tests.
