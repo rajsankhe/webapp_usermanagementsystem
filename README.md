@@ -11,7 +11,11 @@
 - App must be imported in the IntelliJ and Postgres server must be configured to run the app.
 - The application.properties should be set on your local to match your Postgres password for the root user with port number
 - Run the Spring Boot application
-- 
+
+# profiles
+- dev
+-default
+
 # APIs Implemented
 Below swagger URL lists all the APIs which can be hit
 [https://app.swaggerhub.com/apis-docs/csye6225/spring2020/assignment-02](https://app.swaggerhub.com/apis-docs/csye6225/spring2020/assignment-02)
