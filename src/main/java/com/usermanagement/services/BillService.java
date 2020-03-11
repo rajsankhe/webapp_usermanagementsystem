@@ -119,7 +119,8 @@ public class BillService {
 			Bill bill= billRepository.findByOwnerIdAndBillId(loggedUser.getId(), id);
 			if(bill!=null)
 			{
-				deleteFile(name,id,bill.getAttachment().getId());
+				if(bill.getAttachment()!=null)
+					deleteFile(name,id,bill.getAttachment().getId());
 				billRepository.delete(bill);
 			}
 			else
