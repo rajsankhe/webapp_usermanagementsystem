@@ -71,6 +71,8 @@ jobs: # a collection of steps
             cp ../*.yml .
             echo "Copying the jar file from ../target/demo-0.0.1-SNAPSHOT.jar to the codedeploy_artifact"
             cp ../target/demo-0.0.1-SNAPSHOT.jar .
+            echo "Copying the properties from /src/main/resources to the codedeploy_artifact"
+            cp ../src/main/resources/*.* .
             echo "current directory content"
             ls -al
             echo "Zipping all files in the codedeploy_artifact directory"

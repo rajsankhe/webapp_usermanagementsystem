@@ -162,6 +162,13 @@ public class File {
 		this.hash = hash;
 	}
 
+	@Override
+	public String toString() {
+		return "File [id=" + id + ", url=" + url + ", fileNameStored=" + fileNameStored + ", uploadDate=" + uploadDate
+				+ ", bill=" + bill + ", originalFileName=" + originalFileName + ", size=" + size + ", owner=" + owner
+				+ ", contentType=" + contentType + "]";
+	}
+
 	
 	
 }

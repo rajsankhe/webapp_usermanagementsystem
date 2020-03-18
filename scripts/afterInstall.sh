@@ -13,3 +13,6 @@ kill -9 $(ps -ef|grep demo-0.0.1 | grep -v grep | awk '{print $2}')
 
 source /etc/profile.d/envvariable.sh
 nohup java -jar demo-0.0.1-SNAPSHOT.jar > /dev/null 2> /dev/null < /dev/null &
+
+sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/home/ubuntu/webapp/amazon-cloudwatch-agent-schema.json -s
+

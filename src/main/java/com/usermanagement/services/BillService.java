@@ -1,24 +1,20 @@
 package com.usermanagement.services;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
+
 import java.util.List;
 import java.util.UUID;
 
-import javax.validation.Valid;
-
-import org.passay.AllowedRegexRule;
-import org.passay.PasswordData;
-import org.passay.PasswordValidator;
-import org.passay.Rule;
-import org.passay.RuleResult;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCrypt;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.timgroup.statsd.StatsDClient;
 import com.usermanagement.exceptions.FileStorageException;
 import com.usermanagement.exceptions.ResourceNotFoundException;
 import com.usermanagement.exceptions.ValidationException;
@@ -49,18 +45,32 @@ public class BillService {
 	@Autowired
 	private CommonUtil commonUtil;
 	
+	@Autowired
+	private StatsDClient statsDClient;
+	
+	private static final Logger logger = LogManager.getLogger(BillService.class);
+	
 	public Bill save(Bill bill) throws ValidationException{
 		if(Double.compare(bill.getAmountDue(), 0.01)<0){
 			throw new ValidationException("amount_due should be atleast 0.01");
 		}
-		return billRepository.save(bill);
+		logger.info("Bill saved successfully");
+		long startTime= System.currentTimeMillis();
+		Bill result= billRepository.save(bill);
+		long endTime= System.currentTimeMillis();
+		statsDClient.recordExecutionTime("saveBillQuery", endTime-startTime);
+		return result;
 	}
 
 	public List<Bill> getBills(String name) throws ResourceNotFoundException {
 		User loggedUser= userRepository.findByEmailAddress(name.toLowerCase());
 		if(loggedUser!=null)
 		{
+			long startTime= System.currentTimeMillis();
 			List<Bill> bills= billRepository.findByOwnerId(loggedUser.getId());
+			long endTime= System.currentTimeMillis();
+			statsDClient.recordExecutionTime("getBillQuery", endTime-startTime);
+			logger.info("Bills retrieved successfully");
 			return bills;
 		}
 		else
@@ -73,9 +83,15 @@ public class BillService {
 		User loggedUser= userRepository.findByEmailAddress(name.toLowerCase());
 		if(loggedUser!=null)
 		{
+			long startTime= System.currentTimeMillis();
 			Bill bill= billRepository.findByOwnerIdAndBillId(loggedUser.getId(), UUID.fromString(id));
+			long endTime= System.currentTimeMillis();
+			statsDClient.recordExecutionTime("getBillQuery", endTime-startTime);
 			if(bill!=null)
+			{
+				logger.info("Bill retrieved successfully");
 				return bill;
+			}
 			else
 				throw new ResourceNotFoundException("Bill does not exist for given id and logged user");
 		}
@@ -101,6 +117,7 @@ public class BillService {
 				billOp.setAmountDue(bill.getAmountDue());
 				billOp.setCategories(bill.getCategories());
 				billOp.setPaymentStatus(bill.getPaymentStatus());
+				logger.info("Bill updated successfully");
 				return billRepository.save(billOp);
 			}
 			else
@@ -121,7 +138,11 @@ public class BillService {
 			{
 				if(bill.getAttachment()!=null)
 					deleteFile(name,id,bill.getAttachment().getId());
+				logger.info("Bill deleted successfully");
+				long startTime= System.currentTimeMillis();
 				billRepository.delete(bill);
+				long endTime= System.currentTimeMillis();
+				statsDClient.recordExecutionTime("deleteBillQuery", endTime-startTime);
 			}
 			else
 				throw new ResourceNotFoundException("Bill does not exist for given id and logged user");
@@ -148,7 +169,10 @@ public class BillService {
 					}
 					else
 					{
+						long startTime= System.currentTimeMillis();
 						String fileLocation = fileStorageUtil.storeFile(fileinput);
+						long endTime= System.currentTimeMillis();
+						statsDClient.recordExecutionTime("addFileS3", endTime-startTime);
 						File file = new File();
 						file.setUrl(fileLocation);
 						file.setFileNameStored(commonUtil.getFileNameFromPath(fileLocation));
@@ -159,6 +183,7 @@ public class BillService {
 						file.setSize(fileinput.getSize());
 						file.setOwner(loggedUser.getEmailAddress());
 						file.setHash(commonUtil.computeMD5Hash(fileinput.getBytes()));
+						logger.info("file saved successfully");
 						return fileReposiory.save(file);
 					}
 				}
@@ -185,6 +210,7 @@ public class BillService {
 				File file= bill.getAttachment();
 				if(file!=null && file.getId().compareTo(fileId)==0)
 				{
+					logger.info("File retrieved successfully");
 					return file;
 				}
 				else
@@ -209,10 +235,16 @@ public class BillService {
 				File file= bill.getAttachment();
 				if(file!=null &&file.getId().compareTo(fileId)==0)
 				{
+					long startTime= System.currentTimeMillis();
 					bill.setAttachment(null);
 					billRepository.save(bill);
+					logger.info("File deleted from bill");
 					fileStorageUtil.deleteFile(file.getUrl());
+					logger.info("File deleted from storage");
 					fileReposiory.delete(file);
+					logger.info("File deleted from database");
+				 	long endTime= System.currentTimeMillis();
+					statsDClient.recordExecutionTime("deleteFileQuery", endTime-startTime);
 				}
 				else
 					throw new ResourceNotFoundException("File with given Id does not exist for bill");
