@@ -1,5 +1,7 @@
 package com.usermanagement.services;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.passay.AllowedRegexRule;
 import org.passay.PasswordData;
 import org.passay.PasswordValidator;
@@ -9,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
+import com.timgroup.statsd.StatsDClient;
 import com.usermanagement.exceptions.ResourceNotFoundException;
 import com.usermanagement.exceptions.ValidationException;
 import com.usermanagement.models.Bill;
@@ -20,6 +23,12 @@ public class UserService {
 
 	@Autowired
 	private UserRepository userRepository;
+	
+	@Autowired
+	private StatsDClient statsDClient;	
+
+	private static final Logger logger = LogManager.getLogger(UserService.class);
+
 
 	public User save(User newUser) throws ValidationException{
 		User user= userRepository.findByEmailAddress(newUser.getEmailAddress().toLowerCase());
@@ -33,7 +42,11 @@ public class UserService {
 			String passwordHash = BCrypt.hashpw(newUser.getPassword(), BCrypt.gensalt());
 			newUser.setPassword(passwordHash);
 			newUser.setEmailAddress(newUser.getEmailAddress().toLowerCase());
+			long startTime= System.currentTimeMillis();
 			userRepository.save(newUser);
+			long endTime= System.currentTimeMillis();
+			statsDClient.recordExecutionTime("userSaveQuery", endTime-startTime);
+			logger.info("User saved successfully"+newUser);
 		}
 		else {
 			throw new ValidationException("User already exists.");
@@ -58,7 +71,11 @@ public class UserService {
 			user.setPassword(passwordHash);
 			user.setFirstName(updateUser.getFirstName());
 			user.setLastName(updateUser.getLastName());
+			long startTime= System.currentTimeMillis();
 			userRepository.save(user);
+		 	long endTime= System.currentTimeMillis();
+			statsDClient.recordExecutionTime("updateUserQuery", endTime-startTime);
+			logger.info("User updated successfully"+user);
 		}
 		else
 		{
@@ -68,9 +85,13 @@ public class UserService {
 
 
 	public User getUser(String name) throws ResourceNotFoundException {
+		long startTime= System.currentTimeMillis();
 		User loggedUser= userRepository.findByEmailAddress(name.toLowerCase());
+	 	long endTime= System.currentTimeMillis();
+		statsDClient.recordExecutionTime("getUserQuery", endTime-startTime);
 		if(loggedUser!=null)
 		{
+			logger.info("User retrieved successfully"+loggedUser);
 			return loggedUser;
 		}
 		else
@@ -85,6 +106,7 @@ public class UserService {
 		PasswordValidator passwordValidator = new PasswordValidator(ruleRegex);
 		PasswordData passwordData = new PasswordData(password);
 		RuleResult validate = passwordValidator.validate(passwordData);
+		logger.info("Checking password strength");
 		return validate.isValid();
 	}
 

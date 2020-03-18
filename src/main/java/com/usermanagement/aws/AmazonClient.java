@@ -1,4 +1,5 @@
 package com.usermanagement.aws;
+
 import java.io.File;
 
 import java.util.UUID;
@@ -32,6 +33,7 @@ public class AmazonClient {
 
 //	@Value("${amazonProperties.clientRegion}")
 //	private String clientRegion;
+	
 
 	@PostConstruct
 	private void initializeAmazon() {
@@ -83,7 +85,6 @@ public class AmazonClient {
 			s3client.putObject(new PutObjectRequest(bucketName, fileName, multipartFile.getInputStream(), objectMeatadata));
 			//uploadFileTos3bucket(fileName, file);
 		} catch (Exception e) {
-
 			throw new FileStorageException("File not stored in S3 bucket. File name: " + fileName+""+e);
 		} finally {
 			if (file != null) {
