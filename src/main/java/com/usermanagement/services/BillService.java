@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.timgroup.statsd.StatsDClient;
+import com.usermanagement.aws.AmazonSNSClient;
+import com.usermanagement.aws.AmazonSQSClient;
 import com.usermanagement.exceptions.FileStorageException;
 import com.usermanagement.exceptions.ResourceNotFoundException;
 import com.usermanagement.exceptions.ValidationException;
@@ -51,6 +53,12 @@ public class BillService {
 	
 	@Autowired
 	private StatsDClient statsDClient;
+	
+	@Autowired
+	private AmazonSQSClient amazonSQSClient;
+	
+	@Autowired
+	private AmazonSNSClient amazonSNSClient;
 	
 	private static final Logger logger = LogManager.getLogger(BillService.class);
 	
@@ -91,6 +99,7 @@ public class BillService {
 			Bill bill= billRepository.findByOwnerIdAndBillId(loggedUser.getId(), UUID.fromString(id));
 			long endTime= System.currentTimeMillis();
 			statsDClient.recordExecutionTime("getBillQuery", endTime-startTime);
+			amazonSQSClient.publishMessage("Hello Raj GM");
 			if(bill!=null)
 			{
 				logger.info("Bill retrieved successfully");
