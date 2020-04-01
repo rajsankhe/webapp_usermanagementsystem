@@ -5,7 +5,11 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
-
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,6 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.timgroup.statsd.StatsDClient;
+import com.usermanagement.aws.AmazonSNSClient;
+import com.usermanagement.aws.AmazonSQSClient;
 import com.usermanagement.exceptions.FileStorageException;
 import com.usermanagement.exceptions.ResourceNotFoundException;
 import com.usermanagement.exceptions.ValidationException;
@@ -47,6 +53,12 @@ public class BillService {
 	
 	@Autowired
 	private StatsDClient statsDClient;
+	
+	@Autowired
+	private AmazonSQSClient amazonSQSClient;
+	
+	@Autowired
+	private AmazonSNSClient amazonSNSClient;
 	
 	private static final Logger logger = LogManager.getLogger(BillService.class);
 	
@@ -87,6 +99,7 @@ public class BillService {
 			Bill bill= billRepository.findByOwnerIdAndBillId(loggedUser.getId(), UUID.fromString(id));
 			long endTime= System.currentTimeMillis();
 			statsDClient.recordExecutionTime("getBillQuery", endTime-startTime);
+			amazonSQSClient.publishMessage("Hello Raj GM");
 			if(bill!=null)
 			{
 				logger.info("Bill retrieved successfully");
@@ -256,5 +269,47 @@ public class BillService {
 		{
 			throw new ResourceNotFoundException("User with email id: " + name + " does not exist");
 		}
+	}
+
+	public List<Bill> getDueBillsInNextDays(String name, int days) throws ResourceNotFoundException {
+		User loggedUser= userRepository.findByEmailAddress(name.toLowerCase());
+		if(loggedUser!=null)
+		{
+			long startTime= System.currentTimeMillis();
+			List<Bill> bills= billRepository.findByOwnerId(loggedUser.getId());
+			long endTime= System.currentTimeMillis();
+			statsDClient.recordExecutionTime("getBillQuery", endTime-startTime);
+			logger.info("Bills due are retrieved successfully");
+			return getBillsDueInDays(bills,days);
+		}
+		else
+		{
+			throw new ResourceNotFoundException("User with email id: " + name + " does not exist");
+		}
+	}
+
+	private List<Bill> getBillsDueInDays(List<Bill> bills, int days) {
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		Date currentDate = new Date();
+        System.out.println(dateFormat.format(currentDate));
+
+        // convert date to calendar
+        Calendar c = Calendar.getInstance();
+        c.setTime(currentDate);
+
+        // add days to current
+        c.add(Calendar.DATE, days); //same with c.add(Calendar.DAY_OF_MONTH, 1);
+        
+        // convert calendar to date
+        Date currentDatePlusDays= c.getTime();
+        
+        List<Bill> dueBills= new ArrayList<Bill>();
+        for(Bill bill : bills)
+        {
+			Date billDate= bill.getDueDate();
+        	if(billDate.compareTo(currentDate)==0 || billDate.after(currentDate) && billDate.before(currentDatePlusDays))
+        		dueBills.add(bill);
+        }
+		return dueBills;
 	}
 }

@@ -131,9 +131,23 @@
     	</dependency>
 	
 	<!-- Aws -->
+	
+	<!-- S3 -->
 	<dependency>
 		<groupId>com.amazonaws</groupId>
 		<artifactId>aws-java-sdk-s3</artifactId>
+	</dependency>
+	
+	<!-- SQS -->
+	<dependency>
+    	<groupId>com.amazonaws</groupId>
+    	<artifactId>aws-java-sdk-sqs</artifactId>
+	</dependency>
+
+	<!-- SNS -->
+	<dependency>
+		<groupId>com.amazonaws</groupId>
+		<artifactId>aws-java-sdk-sns</artifactId>
 	</dependency>
 		
 	<!--StatsD  -->
