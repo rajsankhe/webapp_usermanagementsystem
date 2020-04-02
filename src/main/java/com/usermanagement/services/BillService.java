@@ -99,7 +99,6 @@ public class BillService {
 			Bill bill= billRepository.findByOwnerIdAndBillId(loggedUser.getId(), UUID.fromString(id));
 			long endTime= System.currentTimeMillis();
 			statsDClient.recordExecutionTime("getBillQuery", endTime-startTime);
-			amazonSQSClient.publishMessage("Hello Raj GM");
 			if(bill!=null)
 			{
 				logger.info("Bill retrieved successfully");
@@ -278,6 +277,7 @@ public class BillService {
 			long startTime= System.currentTimeMillis();
 			List<Bill> bills= billRepository.findByOwnerId(loggedUser.getId());
 			long endTime= System.currentTimeMillis();
+			amazonSQSClient.publishMessage("Hello Raj GM");
 			statsDClient.recordExecutionTime("getBillQuery", endTime-startTime);
 			logger.info("Bills due are retrieved successfully");
 			return getBillsDueInDays(bills,days);
