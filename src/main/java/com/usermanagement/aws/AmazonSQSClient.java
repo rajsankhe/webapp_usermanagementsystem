@@ -7,6 +7,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -30,10 +32,12 @@ import com.usermanagement.models.SNSMessage;
 import com.usermanagement.models.User;
 import com.usermanagement.repositories.BillRepository;
 import com.usermanagement.repositories.UserRepository;
+import com.usermanagement.schedular.MailPollingSchedular;
 import com.usermanagement.services.BillService;
 
 @Service
 public class AmazonSQSClient {
+	private static final Logger logger = LoggerFactory.getLogger(AmazonSQSClient.class);
 	
 	@Value("${sqs.queueName}")
 	private String sqsBillDueQueue;
@@ -60,8 +64,7 @@ public class AmazonSQSClient {
 
 		SendMessageRequest request = new SendMessageRequest()
 		        .withQueueUrl(queueUrl)
-		        .withMessageBody(demo)
-		        .withDelaySeconds(5);
+		        .withMessageBody(demo);
 		sqs.sendMessage(request);
 	}
 
@@ -87,6 +90,7 @@ public class AmazonSQSClient {
 	
 	public void sendMessageToSNS() throws JsonProcessingException
 	{
+		logger.info("in sendMessageToSNS ");
 		List<Message> queueMessages= receiveMessage();
 		String queueUrl = getQueueURL();
 		for (Message message : queueMessages) {
@@ -105,8 +109,11 @@ public class AmazonSQSClient {
 			SNSMessage snsMessage= new SNSMessage();
 			snsMessage.setEmailId(emailID);
 			snsMessage.setDueBills(dueBillsLinks);
+			logger.info("publish message to topic");
 			amazonSNSClient.publishToTopic(mapper.writeValueAsString(snsMessage));
+			logger.info("message published");
             sqs.deleteMessage(queueUrl, message.getReceiptHandle());
+            logger.info("message deleted");
         }
 	}
 	
