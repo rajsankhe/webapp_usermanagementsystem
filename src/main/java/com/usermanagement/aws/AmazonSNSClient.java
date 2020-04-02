@@ -24,10 +24,10 @@ public class AmazonSNSClient {
 	private String snsTopicARN;
 
 	public String publishToTopic(String msg) {
-		logger.info("publish message to topic");
+		logger.debug("publish message to topic");
 		PublishRequest publishRequest = new PublishRequest(snsTopicARN, msg);
 		PublishResult publishResponse = amazonSNSClient.publish(publishRequest);
-		logger.info("published");
+		logger.debug("published");
 		return publishResponse.getMessageId();
 
 	}
