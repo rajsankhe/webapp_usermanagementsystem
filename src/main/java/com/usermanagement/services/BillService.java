@@ -289,30 +289,4 @@ public class BillService {
 		}
 	}
 	
-	
-	
-	public List<Bill> getBillsDueInDays(List<Bill> bills, int days) {
-		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		Date currentDate = new Date();
-        System.out.println(dateFormat.format(currentDate));
-
-        // convert date to calendar
-        Calendar c = Calendar.getInstance();
-        c.setTime(currentDate);
-
-        // add days to current
-        c.add(Calendar.DATE, days); //same with c.add(Calendar.DAY_OF_MONTH, 1);
-        
-        // convert calendar to date
-        Date currentDatePlusDays= c.getTime();
-        
-        List<Bill> dueBills= new ArrayList<Bill>();
-        for(Bill bill : bills)
-        {
-			Date billDate= bill.getDueDate();
-        	if(billDate.compareTo(currentDate)==0 || billDate.after(currentDate) && billDate.before(currentDatePlusDays))
-        		dueBills.add(bill);
-        }
-		return dueBills;
-	}
 }

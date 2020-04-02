@@ -90,8 +90,9 @@ public class AmazonSQSClient {
 		List<Message> queueMessages= receiveMessage();
 		String queueUrl = getQueueURL();
 		for (Message message : queueMessages) {
-			String emailID= message.getBody().split("$")[0];
-			String days= message.getBody().split("$")[1];
+			String msg= message.getBody();
+			String emailID= msg.split("\\$")[0];
+			String days= msg.split("\\$")[1];
 			User loggedUser= userRepository.findByEmailAddress(emailID.toLowerCase());
 			List<Bill> bills= billRepository.findByOwnerId(loggedUser.getId());
 			List<Bill> dueBills= getBillsDueInDays(bills,Integer.parseInt(days));
