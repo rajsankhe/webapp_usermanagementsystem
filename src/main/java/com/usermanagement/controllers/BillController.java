@@ -123,10 +123,11 @@ public class BillController {
 	
 	
 	@GetMapping("/bills/due/{days}")
-	protected ResponseEntity<List<Bill>> getDueBillsInNextDays(Authentication  authentication,@PathVariable(value="days")  int days ) throws ValidationException, ResourceNotFoundException {
+	protected ResponseEntity getDueBillsInNextDays(Authentication  authentication,@PathVariable(value="days")  int days ) throws ValidationException, ResourceNotFoundException {
 		if(authentication!=null)
 		{
-			return new ResponseEntity<List<Bill>>(billService.getDueBillsInNextDays(authentication.getName(),days),HttpStatus.OK);
+			billService.getDueBillsInNextDays(authentication.getName(),days);
+			return new ResponseEntity(HttpStatus.OK);
 		}
 		return new ResponseEntity<List<Bill>>(HttpStatus.UNAUTHORIZED);
 	}

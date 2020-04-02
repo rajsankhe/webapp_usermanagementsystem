@@ -270,25 +270,28 @@ public class BillService {
 		}
 	}
 
-	public List<Bill> getDueBillsInNextDays(String name, int days) throws ResourceNotFoundException {
+	public void getDueBillsInNextDays(String name, int days) throws ResourceNotFoundException {
 		User loggedUser= userRepository.findByEmailAddress(name.toLowerCase());
 		if(loggedUser!=null)
 		{
 			long startTime= System.currentTimeMillis();
 			List<Bill> bills= billRepository.findByOwnerId(loggedUser.getId());
 			long endTime= System.currentTimeMillis();
-			amazonSQSClient.publishMessage("Hello Raj GM");
+			logger.info("Amazon SQS");
+			String message= name.toLowerCase()+"$"+days;
+			amazonSQSClient.publishMessage(message);
 			statsDClient.recordExecutionTime("getBillQuery", endTime-startTime);
 			logger.info("Bills due are retrieved successfully");
-			return getBillsDueInDays(bills,days);
 		}
 		else
 		{
 			throw new ResourceNotFoundException("User with email id: " + name + " does not exist");
 		}
 	}
-
-	private List<Bill> getBillsDueInDays(List<Bill> bills, int days) {
+	
+	
+	
+	public List<Bill> getBillsDueInDays(List<Bill> bills, int days) {
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		Date currentDate = new Date();
         System.out.println(dateFormat.format(currentDate));

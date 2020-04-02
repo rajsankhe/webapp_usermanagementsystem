@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.usermanagement.properties.FileStorageProperties;
 
@@ -12,6 +13,7 @@ import com.usermanagement.properties.FileStorageProperties;
 @EnableConfigurationProperties({
 	FileStorageProperties.class
 })
+@EnableScheduling
 public class UserManagementApplication {
 
 	public static void main(String[] args) {
