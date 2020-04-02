@@ -27,9 +27,9 @@ public class MailPollingSchedular {
 	@Autowired
 	private AmazonSNSClient amazonSNSClient;
 	
-	@Scheduled(cron = "* * * * * ?")
+	@Scheduled(cron = "0 * * * * ?")
 	public void scheduleTask() {
-		
+		logger.info("schedular started");
 		try {
 			amazonSQSClient.sendMessageToSNS();
 		} catch (JsonProcessingException e) {

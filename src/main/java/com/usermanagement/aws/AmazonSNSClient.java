@@ -2,6 +2,8 @@ package com.usermanagement.aws;
 
 import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -14,15 +16,18 @@ import com.amazonaws.services.sns.model.PublishResult;
 
 @Service
 public class AmazonSNSClient {
-
+	
+	private static final Logger logger = LoggerFactory.getLogger(AmazonSNSClient.class);
 	private AmazonSNS amazonSNSClient=AmazonSNSClientBuilder.defaultClient();
 
 	@Value("${sns.topicName}")
 	private String snsTopicARN;
 
 	public String publishToTopic(String msg) {
+		logger.info("publish message to topic");
 		PublishRequest publishRequest = new PublishRequest(snsTopicARN, msg);
 		PublishResult publishResponse = amazonSNSClient.publish(publishRequest);
+		logger.info("published");
 		return publishResponse.getMessageId();
 
 	}
