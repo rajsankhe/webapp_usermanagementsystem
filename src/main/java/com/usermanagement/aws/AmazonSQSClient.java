@@ -90,7 +90,7 @@ public class AmazonSQSClient {
 	
 	public void sendMessageToSNS() throws JsonProcessingException
 	{
-		logger.info("in sendMessageToSNS ");
+		logger.debug("in sendMessageToSNS ");
 		List<Message> queueMessages= receiveMessage();
 		String queueUrl = getQueueURL();
 		for (Message message : queueMessages) {
@@ -109,11 +109,11 @@ public class AmazonSQSClient {
 			SNSMessage snsMessage= new SNSMessage();
 			snsMessage.setEmailId(emailID);
 			snsMessage.setDueBills(dueBillsLinks);
-			logger.info("publish message to topic");
+			logger.debug("publish message to topic");
 			amazonSNSClient.publishToTopic(mapper.writeValueAsString(snsMessage));
-			logger.info("message published");
+			logger.debug("message published");
             sqs.deleteMessage(queueUrl, message.getReceiptHandle());
-            logger.info("message deleted");
+            logger.debug("message deleted");
         }
 	}
 	
