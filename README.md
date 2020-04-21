@@ -1,4 +1,4 @@
-# csye6225-spring 2019
+# csye6225-spring 2020
 # Assignments
 -Raj Sankhe  sankhe.r@husky.neu.edu 
 
